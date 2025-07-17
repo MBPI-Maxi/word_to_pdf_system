@@ -1,0 +1,61 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+*.pyd
+*.dll
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual environment
+.env/
+.venv/
+env/
+venv/
+
+# PyInstaller generated files
+*.manifest
+*.spec
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# PyQt / Qt build artifacts
+*.qrc~
+*.pyc~
+
+# VSCode workspace settings (keep .vscode itself)
+.vscode/*.code-workspace
+.vscode/settings.json  # optional: include if you don't want to share personal settings
+
+# Logs
+*.log
+
+# Other cache files
+.cache/
+.mypy_cache/
+.pytest_cache/
+.coverage
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Temporary files
+*.bak
+*.tmp
+~$*
