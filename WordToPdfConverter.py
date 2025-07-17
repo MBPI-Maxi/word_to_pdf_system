@@ -249,12 +249,14 @@ from PyQt6.QtCore import Qt, QThread, QObject
 from PyQt6.QtGui import QColor
 from typing import Type
 
+import qtawesome as qta
 import os
 
 class WordToPdfConverter(QMainWindow):
     def __init__(self, converter_worker: Type[QObject]):
         super().__init__()
         self.converter_worker = converter_worker
+        self.setWindowIcon(qta.icon("fa5s.file-pdf", color="red"))
         self.setWindowTitle("Batch Word to PDF Converter")
         self.setGeometry(100, 100, 600, 500)
         self.passwords = {}  # Store passwords for files
