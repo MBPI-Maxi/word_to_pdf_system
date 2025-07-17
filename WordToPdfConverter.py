@@ -11,10 +11,11 @@ from PyQt6.QtWidgets import (
     QMessageBox,
     QFileDialog,
     QInputDialog,
+    QFrame,
 )
 
 from PyQt6.QtCore import Qt, QThread, QObject
-from PyQt6.QtGui import QColor
+from PyQt6.QtGui import QColor, QFont
 from typing import Type
 
 import qtawesome as qta
@@ -24,69 +25,147 @@ class WordToPdfConverter(QMainWindow):
     def __init__(self, converter_worker: Type[QObject]):
         super().__init__()
         self.converter_worker = converter_worker
-        self.setWindowIcon(qta.icon("fa5s.file-pdf", color="red"))
+        self.setWindowIcon(qta.icon("fa5s.file-pdf", color="#f44336"))
         self.setWindowTitle("Batch Word to PDF Converter")
-        self.setGeometry(100, 100, 600, 500)
+        self.setGeometry(100, 100, 700, 600)
         self.passwords = {}  # Store passwords for files
         self.default_password = None
         
-
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
         self.main_layout = QVBoxLayout(self.central_widget)
+        self.main_layout.setContentsMargins(20, 20, 20, 20)
+        self.main_layout.setSpacing(15)
 
-        # --- UI Widgets ---
-        self.main_layout.addWidget(QLabel("1. Add Word files to the list."))
+        # Header
+        header = QLabel("Batch Word to PDF Converter")
+        header_font = QFont()
+        header_font.setPointSize(18)
+        header_font.setWeight(600)
+        header.setFont(header_font)
+        header.setStyleSheet("color: #212121;")
+        self.main_layout.addWidget(header)
+
+        # Step 1: Add files
+        step1_frame = QFrame()
+        step1_frame.setFrameShape(QFrame.Shape.StyledPanel)
+        step1_layout = QVBoxLayout(step1_frame)
+        step1_layout.setContentsMargins(15, 15, 15, 15)
+        step1_layout.setSpacing(10)
+        
+        step1_label = QLabel("1. Add Word files to convert")
+        step1_label.setStyleSheet("font-weight: bold;")
+        step1_layout.addWidget(step1_label)
 
         button_layout = QHBoxLayout()
-        self.add_button = QPushButton("Add Files...")
+        self.add_button = QPushButton("Add Files")
+        self.add_button.setIcon(qta.icon("fa5s.folder-open", color="white"))
         self.clear_button = QPushButton("Clear List")
-        self.open_destination_loc = QPushButton("Open Destination Folder")
+        self.clear_button.setIcon(qta.icon("fa5s.trash", color="white"))
+        self.clear_button.setObjectName("danger")
         button_layout.addWidget(self.add_button)
         button_layout.addWidget(self.clear_button)
         button_layout.addStretch()
-        self.main_layout.addLayout(button_layout)
-        
+        step1_layout.addLayout(button_layout)
         
         self.file_list_widget = QListWidget()
-        self.main_layout.addWidget(self.file_list_widget)
+        self.file_list_widget.setSelectionMode(QListWidget.SelectionMode.ExtendedSelection)
+        step1_layout.addWidget(self.file_list_widget)
+        
+        self.main_layout.addWidget(step1_frame)
 
-        # Output directory selection
-        self.main_layout.addWidget(
-            QLabel("2. (Optional) Select an output folder. If empty, PDFs save next to originals."))
+        # Step 2: Output directory
+        step2_frame = QFrame()
+        step2_frame.setFrameShape(QFrame.Shape.StyledPanel)
+        step2_layout = QVBoxLayout(step2_frame)
+        step2_layout.setContentsMargins(15, 15, 15, 15)
+        step2_layout.setSpacing(10)
+        
+        step2_label = QLabel("2. Select output folder (optional)")
+        step2_label.setStyleSheet("font-weight: bold;")
+        step2_layout.addWidget(step2_label)
+        
+        step2_help = QLabel("If empty, PDFs will be saved next to the original files.")
+        step2_help.setStyleSheet("color: #757575; font-size: 13px;")
+        step2_layout.addWidget(step2_help)
+
         output_dir_layout = QHBoxLayout()
         self.output_dir_edit = QLineEdit()
-        self.output_dir_edit.setPlaceholderText("Select an output folder...")
+        self.output_dir_edit.setPlaceholderText("No folder selected...")
         self.output_dir_edit.setReadOnly(True)
         self.output_dir_button = QPushButton("Browse...")
+        self.output_dir_button.setIcon(qta.icon("fa5s.folder", color="white"))
         output_dir_layout.addWidget(self.output_dir_edit)
-        
         output_dir_layout.addWidget(self.output_dir_button)
-        self.main_layout.addWidget(self.open_destination_loc)
-        self.main_layout.addLayout(output_dir_layout)
+        step2_layout.addLayout(output_dir_layout)
+        
+        self.open_destination_loc = QPushButton("Open Destination Folder")
+        self.open_destination_loc.setIcon(qta.icon("fa5s.external-link-alt", color="white"))
+        step2_layout.addWidget(self.open_destination_loc)
+        
+        self.main_layout.addWidget(step2_frame)
 
-        # Default password option
-        self.main_layout.addWidget(QLabel("3. (Optional) Set a default password for protected files:"))
+        # Step 3: Password protection
+        step3_frame = QFrame()
+        step3_frame.setFrameShape(QFrame.Shape.StyledPanel)
+        step3_layout = QVBoxLayout(step3_frame)
+        step3_layout.setContentsMargins(15, 15, 15, 15)
+        step3_layout.setSpacing(10)
+        
+        step3_label = QLabel("3. Set default password for protected files (optional)")
+        step3_label.setStyleSheet("font-weight: bold;")
+        step3_layout.addWidget(step3_label)
+        
         password_layout = QHBoxLayout()
         self.password_edit = QLineEdit()
         self.password_edit.setPlaceholderText("Enter default password...")
         self.password_edit.setEchoMode(QLineEdit.EchoMode.Password)
         self.set_password_button = QPushButton("Set Password")
+        self.set_password_button.setIcon(qta.icon("fa5s.key", color="white"))
         password_layout.addWidget(self.password_edit)
         password_layout.addWidget(self.set_password_button)
-        self.main_layout.addLayout(password_layout)
+        step3_layout.addLayout(password_layout)
+        
+        self.main_layout.addWidget(step3_frame)
 
-        self.main_layout.addWidget(QLabel("4. Start the conversion."))
+        # Step 4: Convert
+        step4_frame = QFrame()
+        step4_frame.setFrameShape(QFrame.Shape.StyledPanel)
+        step4_layout = QVBoxLayout(step4_frame)
+        step4_layout.setContentsMargins(15, 15, 15, 15)
+        step4_layout.setSpacing(15)
+        
+        step4_label = QLabel("4. Start conversion")
+        step4_label.setStyleSheet("font-weight: bold;")
+        step4_layout.addWidget(step4_label)
+        
         self.convert_button = QPushButton("Convert All to PDF")
+        self.convert_button.setIcon(qta.icon("fa5s.file-export", color="white"))
         self.convert_button.setEnabled(False)
-        self.main_layout.addWidget(self.convert_button)
+        self.convert_button.setObjectName("convert-btn")
+        
+        step4_layout.addWidget(self.convert_button)
 
-        self.current_file_label = QLabel("Ready to start.")
-        self.main_layout.addWidget(self.current_file_label)
+        # Progress area
+        progress_frame = QFrame()
+        progress_layout = QVBoxLayout(progress_frame)
+        progress_layout.setContentsMargins(0, 0, 0, 0)
+        progress_layout.setSpacing(8)
+        
+        self.current_file_label = QLabel("Ready to start conversion.")
+        self.current_file_label.setStyleSheet("color: #616161;")
+        progress_layout.addWidget(self.current_file_label)
 
         self.progress_bar = QProgressBar()
-        self.main_layout.addWidget(self.progress_bar)
+        self.progress_bar.setRange(0, 100)
+        self.progress_bar.setTextVisible(True)
+        progress_layout.addWidget(self.progress_bar)
+        
+        step4_layout.addWidget(progress_frame)
+        self.main_layout.addWidget(step4_frame)
 
+        # Status bar
+        self.statusBar().setObjectName("status-bar-qstatus")
         self.statusBar().showMessage("Ready")
 
         # --- Connect Signals ---
@@ -99,6 +178,17 @@ class WordToPdfConverter(QMainWindow):
 
         self.thread = None
         self.worker = None
+
+        self.apply_styles()
+
+    def apply_styles(self):
+        try:
+            qss_path = os.path.join(os.getcwd(), "styles.css")
+
+            with open(qss_path, "r") as f:
+                self.setStyleSheet(f.read())
+        except FileNotFoundError:
+            print("Warning styles is not loaded due to 'styles.css' is missing")
 
     def open_destination_folder(self):
         path = self.output_dir_edit.text()
@@ -203,7 +293,6 @@ class WordToPdfConverter(QMainWindow):
             # Update the list item immediately to reflect the skip
             item.setText(f"{original_text} --- ➖ Skipped (user chose not to overwrite)")
             item.setBackground(QColor("lightgray"))
-
 
     def clear_list(self):
         self.file_list_widget.clear()
