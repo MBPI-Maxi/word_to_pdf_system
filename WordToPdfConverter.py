@@ -20,6 +20,7 @@ from typing import Type
 
 import qtawesome as qta
 import os
+import sys
 
 class WordToPdfConverter(QMainWindow):
     def __init__(self, converter_worker: Type[QObject]):
@@ -181,14 +182,29 @@ class WordToPdfConverter(QMainWindow):
 
         self.apply_styles()
 
+    # def apply_styles(self):
+    #     try:
+    #         qss_path = os.path.join(os.getcwd(), "styles.css")
+
+    #         with open(qss_path, "r") as f:
+    #             self.setStyleSheet(f.read())
+    #     except FileNotFoundError:
+    #         print("Warning styles is not loaded due to 'styles.css' is missing")
     def apply_styles(self):
         try:
-            qss_path = os.path.join(os.getcwd(), "styles.css")
+            if hasattr(sys, "_MEIPASS"):
+                # Running as a PyInstaller bundle
+                base_path = sys._MEIPASS
+            else:
+                # Running from source
+                base_path = os.getcwd()
+
+            qss_path = os.path.join(base_path, "styles.css")
 
             with open(qss_path, "r") as f:
                 self.setStyleSheet(f.read())
         except FileNotFoundError:
-            print("Warning styles is not loaded due to 'styles.css' is missing")
+            print("Warning: 'styles.css' not found.")
 
     def open_destination_folder(self):
         path = self.output_dir_edit.text()
